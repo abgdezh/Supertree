@@ -1,0 +1,25 @@
+#!/usr/bin/python3
+files = ['CartesianTree.h', 'CartesianTree.cpp', 'Tree.h', 'Tree.cpp', 'main.cpp']
+read_files = []
+for f in files:
+	read_files.append(open(f).readlines())
+includes = set()
+usings = set()
+for i in read_files:
+	for line in i:
+		if line[0] == '#': includes.add(line)
+		if line.startswith('using'): usings.add(line)
+output = open('result.cpp', 'w')
+for i in includes:
+	if i.startswith('#include') and not i.count('"'):
+		print(i, file=output, end='')
+
+for i in usings:
+	print(i, file=output, end='')
+
+for f in read_files:
+	for line in f:
+		if line[0] != '#' and not line.startswith('using'):
+			print(line, file=output, end='')
+
+output.close()
