@@ -11,21 +11,21 @@ using std::pair;
 class CartesianTree {
     CartesianTree *left;
     CartesianTree *right;
-    int data, priority;
-    long long sum;
-    int elementsNumber;
-    int minimum, maximum;
+    long data, priority;
+    long sum;
+    size_t elementsNumber;
+    long minimum, maximum;
 
     bool isReversed;
     bool isAssigned;
 
-    int addition;
-    int assignment;
+    long addition;
+    long assignment;
 
     enum Order {
         NO_ORDER, INCREASING, DECREASING, STABLE
     } order;
-    int firstElement, lastElement;
+    long firstElement, lastElement;
 
     static bool isCompatibleWithOrder(CartesianTree *tree, Order order);
 
@@ -34,31 +34,32 @@ class CartesianTree {
     void push();
 
 public:
-    CartesianTree(int x);
+    CartesianTree(long x);
 
-    static pair<CartesianTree *, CartesianTree *> split(CartesianTree *t, int num);
+    static pair<CartesianTree *, CartesianTree *> split(CartesianTree *t, size_t num);
 
     static CartesianTree *merge(CartesianTree *l, CartesianTree *r);
 
-    long long getSum() const;
+    long getSum() const;
 
-    int getMin() const;
+    long getMin() const;
 
-    int getMax() const;
+    long getMax() const;
 
-    int getUpperOrLowerBound(int posBeg, int number, bool suffixIsDecreasing);
+    size_t getUpperOrLowerBound(size_t posBeg, long number, bool suffixIsDecreasing);
 
-    int getElementsNumber() const;
+    size_t getElementsNumber() const;
 
-    void add(int delta);
+    void add(long delta);
 
-    void assign(int value);
+    void assign(long value);
 
     void reverse();
 
-    int getBeginningOfMaxOrderedSuffix(bool decreasingOrder);
+    size_t getBeginningOfMaxOrderedSuffix(bool decreasingOrder);
 
-    static std::string toString(CartesianTree *node, bool reversed = false, int assignment = INT32_MAX, int addition = 0);
+    static std::string
+    toString(CartesianTree *node, bool reversed = false, long assignment = INT32_MAX, long addition = 0);
 };
 
 

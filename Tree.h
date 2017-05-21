@@ -14,44 +14,49 @@ class Tree {
         CartesianTree *beforeLth;
         CartesianTree *fromLthToRth;
         CartesianTree *afterRth;
-    } separation;
+        Tree &tree;
 
-    void separate(int left, int right);
+        Separation(Tree &tree, size_t left, size_t right);
 
-    void join();
+        ~Separation();
+    };
+
+    void separate(Separation &separation, size_t left, size_t right);
+
+    void join(Separation &separation);
 
     void doGeneralizedNextPrevPermutation(bool next);
 
 public:
     Tree();
 
-    int get(int pos);
+    long get(size_t pos);
 
-    long long getSum(int left, int right);
+    long getSum(size_t left, size_t right);
 
-    int getMin(int left, int right);
+    long getMin(size_t left, size_t right);
 
-    int getMax(int left, int right);
+    long getMax(size_t left, size_t right);
 
-    int size();
+    size_t size();
 
-    void insert(int elem, int position);
+    void insert(long elem, size_t position);
 
-    void remove(int position);
+    void remove(size_t position);
 
-    void add(int left, int right, int addition);
+    void add(size_t left, size_t right, long addition);
 
-    void assign(int left, int right, int assignment);
+    void assign(size_t left, size_t right, long assignment);
 
-    void assign(int pos, int assignment);
+    void assign(size_t pos, long assignment);
 
-    void reverse(int left, int right);
+    void reverse(size_t left, size_t right);
 
-    void swap(int pos1, int pos2);
+    void swap(size_t pos1, size_t pos2);
 
-    void nextPermutation(int left, int right);
+    void nextPermutation(size_t left, size_t right);
 
-    void prevPermutation(int left, int right);
+    void prevPermutation(size_t left, size_t right);
 };
 
 

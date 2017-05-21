@@ -8,17 +8,17 @@ using std::cout;
 using std::min;
 using std::max;
 
-CartesianTree::CartesianTree(int x) : left(0), right(0), data(x), priority(rand()),
-                                      sum(x), elementsNumber(1), minimum(x), maximum(x),
-                                      isReversed(false), isAssigned(false), addition(0), assignment(0),
-                                      order(STABLE), firstElement(x), lastElement(x) {}
+CartesianTree::CartesianTree(long x) : left(0), right(0), data(x), priority(rand()),
+                                       sum(x), elementsNumber(1), minimum(x), maximum(x),
+                                       isReversed(false), isAssigned(false), addition(0), assignment(0),
+                                       order(STABLE), firstElement(x), lastElement(x) {}
 
-pair<CartesianTree *, CartesianTree *> CartesianTree::split(CartesianTree *t, int num) {
+pair<CartesianTree *, CartesianTree *> CartesianTree::split(CartesianTree *t, size_t num) {
     //std::string tToStr = toString(t);
     if (!t)
-        return make_pair(nullptr, nullptr);
+        return make_pair<CartesianTree *, CartesianTree *>(nullptr, nullptr);
     t->push();
-    int leftNum = t->left ? t->left->elementsNumber : 0;
+    size_t leftNum = t->left ? t->left->elementsNumber : 0;
     if (leftNum < num) {
         pair<CartesianTree *, CartesianTree *> tmp = split(t->right, num - leftNum - 1);
         t->right = tmp.first;
@@ -124,21 +124,21 @@ void CartesianTree::push() {
     recalculate();
 }
 
-void CartesianTree::add(int delta) {
+void CartesianTree::add(long delta) {
     addition += delta;
     data += delta;
-    sum += 1LL * elementsNumber * delta;
+    sum += 1L * elementsNumber * delta;
     minimum += delta;
     maximum += delta;
     firstElement += delta;
     lastElement += delta;
 }
 
-void CartesianTree::assign(int value) {
+void CartesianTree::assign(long value) {
     assignment = data = maximum = minimum = firstElement = lastElement = value;
     isAssigned = true;
     addition = 0;
-    sum = 1LL * elementsNumber * value;
+    sum = 1L * elementsNumber * value;
     order = STABLE;
 }
 
@@ -152,26 +152,26 @@ void CartesianTree::reverse() {
     swap(left, right);
 }
 
-long long CartesianTree::getSum() const {
+long CartesianTree::getSum() const {
     return sum;
 }
 
-int CartesianTree::getMin() const {
+long CartesianTree::getMin() const {
     return minimum;
 }
 
-int CartesianTree::getMax() const {
+long CartesianTree::getMax() const {
     return maximum;
 }
 
-int CartesianTree::getElementsNumber() const {
+size_t CartesianTree::getElementsNumber() const {
     return elementsNumber;
 }
 
-int CartesianTree::getBeginningOfMaxOrderedSuffix(bool decreasingOrder) {
+size_t CartesianTree::getBeginningOfMaxOrderedSuffix(bool decreasingOrder) {
     push();
     Order rightOrder = decreasingOrder ? DECREASING : INCREASING;
-    int leftNum = left ? left->elementsNumber : 0;
+    size_t leftNum = left ? left->elementsNumber : 0;
     if (isCompatibleWithOrder(right, rightOrder)) {
         if (!right || (decreasingOrder ? (right->firstElement <= data) : (right->firstElement >= data))) {
             if (left && (decreasingOrder ? (left->lastElement >= data) : (left->lastElement <= data))) {
@@ -185,17 +185,18 @@ int CartesianTree::getBeginningOfMaxOrderedSuffix(bool decreasingOrder) {
 
 }
 
-int CartesianTree::getUpperOrLowerBound(int posBeg, int number, bool suffixIsDecreasing) {
+size_t CartesianTree::getUpperOrLowerBound(size_t posBeg, long number, bool suffixIsDecreasing) {
     push();
-    int posRoot = left ? left->elementsNumber : 0;
+    size_t posRoot = left ? left->elementsNumber : 0;
     if (right && (suffixIsDecreasing ? (right->maximum >= number) : (right->minimum <= number)))
-        return right->getUpperOrLowerBound(max(posBeg - posRoot - 1, 0), number, suffixIsDecreasing) + posRoot + 1;
+        return right->getUpperOrLowerBound(posBeg >= posRoot + 1 ? posBeg - posRoot - 1 : 0, number,
+                                           suffixIsDecreasing) + posRoot + 1;
     if (suffixIsDecreasing ? (data >= number) : (data <= number))
         return posRoot;
     return left->getUpperOrLowerBound(posBeg, number, suffixIsDecreasing);
 }
 
-std::string CartesianTree::toString(CartesianTree *node, bool reversed, int assignment, int addition) {
+std::string CartesianTree::toString(CartesianTree *node, bool reversed, long assignment, long addition) {
     std::string res = "";
     if (!node)
         return res;

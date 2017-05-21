@@ -1,22 +1,24 @@
 #include <iostream>
-#include <string>
 #include <utility>
 #include <cstdlib>
-
-using std::cin;
-using std::pair;
-using std::min;
+#include <string>
 using std::max;
-using std::cout;
 using std::swap;
+using std::pair;
+using std::cin;
+using std::cout;
 using std::make_pair;
+using std::min;
+
+
+
 
 class CartesianTree {
     CartesianTree *left;
     CartesianTree *right;
     long data, priority;
     long sum;
-    long elementsNumber;
+    size_t elementsNumber;
     long minimum, maximum;
 
     bool isReversed;
@@ -39,7 +41,7 @@ class CartesianTree {
 public:
     CartesianTree(long x);
 
-    static pair<CartesianTree *, CartesianTree *> split(CartesianTree *t, long num);
+    static pair<CartesianTree *, CartesianTree *> split(CartesianTree *t, size_t num);
 
     static CartesianTree *merge(CartesianTree *l, CartesianTree *r);
 
@@ -49,9 +51,9 @@ public:
 
     long getMax() const;
 
-    long getUpperOrLowerBound(long posBeg, long number, bool suffixIsDecreasing);
+    size_t getUpperOrLowerBound(size_t posBeg, long number, bool suffixIsDecreasing);
 
-    long getElementsNumber() const;
+    size_t getElementsNumber() const;
 
     void add(long delta);
 
@@ -59,38 +61,46 @@ public:
 
     void reverse();
 
-    long getBeginningOfMaxOrderedSuffix(bool decreasingOrder);
+    size_t getBeginningOfMaxOrderedSuffix(bool decreasingOrder);
 
-    static std::string toString(CartesianTree *node, bool reversed = false, long assignment = INT32_MAX, long addition = 0);
+    static std::string
+    toString(CartesianTree *node, bool reversed = false, long assignment = INT32_MAX, long addition = 0);
 };
 
 
 
 
 CartesianTree::CartesianTree(long x) : left(0), right(0), data(x), priority(rand()),
-                                      sum(x), elementsNumber(1), minimum(x), maximum(x),
-                                      isReversed(false), isAssigned(false), addition(0), assignment(0),
-                                      order(STABLE), firstElement(x), lastElement(x) {}
+                                       sum(x), elementsNumber(1), minimum(x), maximum(x),
+                                       isReversed(false), isAssigned(false), addition(0), assignment(0),
+                                       order(STABLE), firstElement(x), lastElement(x) {}
 
-pair<CartesianTree *, CartesianTree *> CartesianTree::split(CartesianTree *t, long num) {
+pair<CartesianTree *, CartesianTree *> CartesianTree::split(CartesianTree *t, size_t num) {
+    //std::string tToStr = toString(t);
     if (!t)
-        return make_pair(nullptr, nullptr);
+        return make_pair<CartesianTree *, CartesianTree *>(nullptr, nullptr);
     t->push();
-    long leftNum = t->left ? t->left->elementsNumber : 0;
+    size_t leftNum = t->left ? t->left->elementsNumber : 0;
     if (leftNum < num) {
         pair<CartesianTree *, CartesianTree *> tmp = split(t->right, num - leftNum - 1);
         t->right = tmp.first;
         t->recalculate();
+        /*cout << "Split: [" << tToStr << "], num=" << num << ", result: [" << toString(t) << "], ["
+             << toString(tmp.second) << "]\n";*/
         return make_pair(t, tmp.second);
     } else {
         pair<CartesianTree *, CartesianTree *> tmp = split(t->left, num);
         t->left = tmp.second;
         t->recalculate();
+        /*cout << "Split: [" << tToStr << "], num=" << num << ", result: [" << toString(tmp.first) << "], ["
+             << toString(t) << "]\n";*/
         return make_pair(tmp.first, t);
     }
 }
 
 CartesianTree *CartesianTree::merge(CartesianTree *l, CartesianTree *r) {
+    //std::string lToStr = toString(l);
+    //std::string rToStr = toString(r);
     if (!l)
         return r;
     if (!r)
@@ -104,6 +114,7 @@ CartesianTree *CartesianTree::merge(CartesianTree *l, CartesianTree *r) {
         r->left = merge(l, r->left);
     }
     ret->recalculate();
+    //cout << "Merge: [" << lToStr << "], [" << rToStr << "], result: [" << toString(ret) << "]\n";
     return ret;
 }
 
@@ -215,14 +226,14 @@ long CartesianTree::getMax() const {
     return maximum;
 }
 
-long CartesianTree::getElementsNumber() const {
+size_t CartesianTree::getElementsNumber() const {
     return elementsNumber;
 }
 
-long CartesianTree::getBeginningOfMaxOrderedSuffix(bool decreasingOrder) {
+size_t CartesianTree::getBeginningOfMaxOrderedSuffix(bool decreasingOrder) {
     push();
     Order rightOrder = decreasingOrder ? DECREASING : INCREASING;
-    long leftNum = left ? left->elementsNumber : 0;
+    size_t leftNum = left ? left->elementsNumber : 0;
     if (isCompatibleWithOrder(right, rightOrder)) {
         if (!right || (decreasingOrder ? (right->firstElement <= data) : (right->firstElement >= data))) {
             if (left && (decreasingOrder ? (left->lastElement >= data) : (left->lastElement <= data))) {
@@ -236,11 +247,12 @@ long CartesianTree::getBeginningOfMaxOrderedSuffix(bool decreasingOrder) {
 
 }
 
-long CartesianTree::getUpperOrLowerBound(long posBeg, long number, bool suffixIsDecreasing) {
+size_t CartesianTree::getUpperOrLowerBound(size_t posBeg, long number, bool suffixIsDecreasing) {
     push();
-    long posRoot = left ? left->elementsNumber : 0;
+    size_t posRoot = left ? left->elementsNumber : 0;
     if (right && (suffixIsDecreasing ? (right->maximum >= number) : (right->minimum <= number)))
-        return right->getUpperOrLowerBound(max(posBeg - posRoot - 1, 0L), number, suffixIsDecreasing) + posRoot + 1;
+        return right->getUpperOrLowerBound(posBeg >= posRoot + 1 ? posBeg - posRoot - 1 : 0, number,
+                                           suffixIsDecreasing) + posRoot + 1;
     if (suffixIsDecreasing ? (data >= number) : (data <= number))
         return posRoot;
     return left->getUpperOrLowerBound(posBeg, number, suffixIsDecreasing);
@@ -268,44 +280,49 @@ class Tree {
         CartesianTree *beforeLth;
         CartesianTree *fromLthToRth;
         CartesianTree *afterRth;
-    } separation;
+        Tree &tree;
 
-    void separate(long left, long right);
+        Separation(Tree &tree, size_t left, size_t right);
 
-    void join();
+        ~Separation();
+    };
+
+    void separate(Separation &separation, size_t left, size_t right);
+
+    void join(Separation &separation);
 
     void doGeneralizedNextPrevPermutation(bool next);
 
 public:
     Tree();
 
-    long get(long pos);
+    long get(size_t pos);
 
-    long getSum(long left, long right);
+    long getSum(size_t left, size_t right);
 
-    long getMin(long left, long right);
+    long getMin(size_t left, size_t right);
 
-    long getMax(long left, long right);
+    long getMax(size_t left, size_t right);
 
-    long size();
+    size_t size();
 
-    void insert(long elem, long position);
+    void insert(long elem, size_t position);
 
-    void remove(long position);
+    void remove(size_t position);
 
-    void add(long left, long right, long addition);
+    void add(size_t left, size_t right, long addition);
 
-    void assign(long left, long right, long assignment);
+    void assign(size_t left, size_t right, long assignment);
 
-    void assign(long pos, long assignment);
+    void assign(size_t pos, long assignment);
 
-    void reverse(long left, long right);
+    void reverse(size_t left, size_t right);
 
-    void swap(long pos1, long pos2);
+    void swap(size_t pos1, size_t pos2);
 
-    void nextPermutation(long left, long right);
+    void nextPermutation(size_t left, size_t right);
 
-    void prevPermutation(long left, long right);
+    void prevPermutation(size_t left, size_t right);
 };
 
 
@@ -313,123 +330,112 @@ public:
 
 Tree::Tree() : root(0) {}
 
-long Tree::size() {
+size_t Tree::size() {
     return root ? root->getElementsNumber() : 0;
 }
 
-void Tree::separate(long left, long right) {
+void Tree::separate(Separation &separation, size_t left, size_t right) {
     pair<CartesianTree *, CartesianTree *> beforeLthAndAfterLth = CartesianTree::split(root, left);
     pair<CartesianTree *, CartesianTree *> fromLthToRthAndAfterRth = CartesianTree::split(beforeLthAndAfterLth.second,
-                                                                                          right - left + 1);
+                                                                                          right + 1 - left);
     separation.beforeLth = beforeLthAndAfterLth.first;
     separation.fromLthToRth = fromLthToRthAndAfterRth.first;
     separation.afterRth = fromLthToRthAndAfterRth.second;
 }
 
-void Tree::join() {
+void Tree::join(Separation &separation) {
     root = CartesianTree::merge(separation.beforeLth,
                                 CartesianTree::merge(separation.fromLthToRth, separation.afterRth));
 }
 
-long Tree::get(long pos) {
+long Tree::get(size_t pos) {
     return getSum(pos, pos);
 }
 
-long Tree::getSum(long left, long right) {
-    separate(left, right);
-    long res = separation.fromLthToRth->getSum();
-    join();
-    return res;
+long Tree::getSum(size_t left, size_t right) {
+    return Separation(*this, left, right).fromLthToRth->getSum();
 }
 
-void Tree::insert(long elem, long position) {
-    separate(position, position - 1);
+void Tree::insert(long elem, size_t position) {
+    Separation separation(*this, position, position - 1);
     separation.fromLthToRth = new CartesianTree(elem);
-    join();
 }
 
-void Tree::remove(long position) {
-    separate(position, position);
-    if (separation.fromLthToRth)
-        delete separation.fromLthToRth;
+void Tree::remove(size_t position) {
+    Separation separation(*this, position, position);
+    delete separation.fromLthToRth;
     separation.fromLthToRth = nullptr;
-    join();
 }
 
-void Tree::add(long left, long right, long addition) {
-    separate(left, right);
-    separation.fromLthToRth->add(addition);
-    join();
+void Tree::add(size_t left, size_t right, long addition) {
+    Separation(*this, left, right).fromLthToRth->add(addition);
 }
 
-void Tree::assign(long left, long right, long assignment) {
-    separate(left, right);
-    separation.fromLthToRth->assign(assignment);
-    join();
+void Tree::assign(size_t left, size_t right, long assignment) {
+    Separation(*this, left, right).fromLthToRth->assign(assignment);
 }
 
-void Tree::assign(long pos, long assignment) {
+void Tree::assign(size_t pos, long assignment) {
     assign(pos, pos, assignment);
 }
 
-void Tree::reverse(long left, long right) {
-    separate(left, right);
-    separation.fromLthToRth->reverse();
-    join();
+void Tree::reverse(size_t left, size_t right) {
+    Separation(*this, left, right).fromLthToRth->reverse();
 }
 
-void Tree::swap(long pos1, long pos2) {
+void Tree::swap(size_t pos1, size_t pos2) {
     long tmp = get(pos1);
     assign(pos1, get(pos2));
     assign(pos2, tmp);
 }
 
-long Tree::getMax(long left, long right) {
-    separate(left, right);
-    long ret = separation.fromLthToRth->getMax();
-    join();
-    return ret;
+long Tree::getMax(size_t left, size_t right) {
+    return Separation(*this, left, right).fromLthToRth->getMax();
 }
 
-long Tree::getMin(long left, long right) {
-    separate(left, right);
-    long ret = separation.fromLthToRth->getMin();
-    join();
-    return ret;
+long Tree::getMin(size_t left, size_t right) {
+    return Separation(*this, left, right).fromLthToRth->getMin();
 }
 
 Tree::Tree(CartesianTree *root) : root(root) {}
 
 void Tree::doGeneralizedNextPrevPermutation(bool next) {
-    long beginningOfMaxOrderSuffix = root->getBeginningOfMaxOrderedSuffix(next);
+    size_t beginningOfMaxOrderSuffix = root->getBeginningOfMaxOrderedSuffix(next);
     if (beginningOfMaxOrderSuffix > 0) {
-        long posOfBound = root->getUpperOrLowerBound(beginningOfMaxOrderSuffix,
-                                                    get(beginningOfMaxOrderSuffix - 1) + (next ? 1 : -1), next);
+        size_t posOfBound = root->getUpperOrLowerBound(beginningOfMaxOrderSuffix,
+                                                       get(beginningOfMaxOrderSuffix - 1) + (next ? 1 : -1), next);
         swap(posOfBound, beginningOfMaxOrderSuffix - 1);
     }
     reverse(beginningOfMaxOrderSuffix, root->getElementsNumber() - 1);
 }
 
-void Tree::nextPermutation(long left, long right) {
-    separate(left, right);
+void Tree::nextPermutation(size_t left, size_t right) {
+    Separation separation(*this, left, right);
     Tree segment(separation.fromLthToRth);
     segment.doGeneralizedNextPrevPermutation(true);
-    join();
 }
 
-void Tree::prevPermutation(long left, long right) {
-    separate(left, right);
+void Tree::prevPermutation(size_t left, size_t right) {
+    Separation separation(*this, left, right);
     Tree segment(separation.fromLthToRth);
     segment.doGeneralizedNextPrevPermutation(false);
-    join();
 }
+
+Tree::Separation::Separation(Tree &tree, size_t left, size_t right) : tree(tree) {
+    tree.separate(*this, left, right);
+}
+
+Tree::Separation::~Separation() {
+    tree.join(*this);
+}
+
 
 
 int main() {
     Tree tree;
     long n;
     cin >> n;
-    for (long i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         long val;
         cin >> val;
         tree.insert(val, i);
@@ -440,35 +446,38 @@ int main() {
         long type;
         cin >> type;
         if (type == 1) {
-            long l, r;
+            size_t l, r;
             cin >> l >> r;
             cout << tree.getSum(l, r) << '\n';
         } else if (type == 2) {
-            long x, pos;
+            long x;
+            size_t pos;
             cin >> x >> pos;
             tree.insert(x, pos);
         } else if (type == 3) {
-            long pos;
+            size_t pos;
             cin >> pos;
             tree.remove(pos);
         } else if (type == 4) {
-            long x, l, r;
+            long x;
+            size_t l, r;
             cin >> x >> l >> r;
             tree.assign(l, r, x);
         } else if (type == 5) {
-            long x, l, r;
+            long x;
+            size_t l, r;
             cin >> x >> l >> r;
             tree.add(l, r, x);
         } else if (type == 6) {
-            long l, r;
+            size_t l, r;
             cin >> l >> r;
             tree.nextPermutation(l, r);
         } else if (type == 7) {
-            long l, r;
+            size_t l, r;
             cin >> l >> r;
             tree.prevPermutation(l, r);
         }
     }
-    for (long i = 0; i < tree.size(); ++i)
+    for (size_t i = 0; i < tree.size(); ++i)
         cout << tree.get(i) << ' ';
 }
